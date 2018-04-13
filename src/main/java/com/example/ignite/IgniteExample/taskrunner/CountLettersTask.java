@@ -65,8 +65,7 @@ public class CountLettersTask {
         IgniteCompute compute = ignite.compute().withNoFailover();
         List<Long> results = compute.execute(task, null);
 
-        LOGGER.info(String.format("'Letter Count' processing time: %d seconds",
-                (System.currentTimeMillis() - start) / 1000));
+        LOGGER.info(String.format("'Letter Count' processing time: %d ms", System.currentTimeMillis() - start));
         System.out.println("Total of found letters: " + results.get(0));
     }
 }
