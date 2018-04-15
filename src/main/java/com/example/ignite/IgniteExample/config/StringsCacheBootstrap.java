@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -29,12 +29,36 @@ public class StringsCacheBootstrap {
 
     private List<String> getStrings() {
         try {
-            URI uri = StringsCacheBootstrap.class.getResource("/big.txt").toURI();
-            return Files.readAllLines(Paths.get(uri));
-        } catch (IOException | URISyntaxException e) {
+            List<File> files = getAllFiles();
+            List<String> lines = new ArrayList<>();
+            for (File file : files) {
+                Path path = file.toPath();
+                List<String> fileLines = Files.readAllLines(path);
+                lines.addAll(fileLines);
+            }
+            return lines;
+        } catch (IOException e) {
             LOGGER.error("Falha critica ao ler arquivo", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private List<File> getAllFiles() {
+        List<File> textFiles = new ArrayList<>();
+
+        for (File file : getResourceFolderFiles("texts")) {
+            if (file.isFile()) {
+                textFiles.add(file);
+            }
+        }
+        return textFiles;
+    }
+
+    private File[] getResourceFolderFiles (String folder) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        URL url = loader.getResource(folder);
+        String path = url.getPath();
+        return new File(path).listFiles();
     }
 
     public void boostrap() {
