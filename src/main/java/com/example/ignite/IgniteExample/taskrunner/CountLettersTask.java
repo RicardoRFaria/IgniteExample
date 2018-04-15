@@ -15,9 +15,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Component
 public class CountLettersTask {
@@ -36,9 +40,9 @@ public class CountLettersTask {
     public void processMerchantStatus() {
         LOGGER.info("Starting 'Letter Count' recalculation for all nodes.");
         long start = System.currentTimeMillis();
-        ComputeTask<String, List<Long>>
+        ComputeTask<String, Map<Character, Long>>
                 task =
-                new ComputeTaskAdapter<String, List<Long>>() {
+                new ComputeTaskAdapter<String, Map<Character, Long>>() {
 
                     @Override
                     public Map<? extends ComputeJob, ClusterNode> map(List<ClusterNode> subgrid, String arg)
@@ -46,26 +50,33 @@ public class CountLettersTask {
                         Map<ComputeJob, ClusterNode> map = new ConcurrentHashMap<>(subgrid.size());
 
                         for (ClusterNode node : subgrid) {
-                            map.put(new CountLetterComputeTask(cache, 'A'), node);
+                            map.put(new CountLetterComputeTask(cache), node);
                         }
                         return map;
                     }
 
                     @Override
-                    public List<Long> reduce(List<ComputeJobResult> jobResults)
+                    public Map<Character, Long> reduce(List<ComputeJobResult> jobResults)
                             throws IgniteException {
-                        List<Long> reducedResult = new ArrayList<>();
+                        Map<Character, Long> result = new HashMap<>();
                         for (ComputeJobResult jobResult : jobResults) {
-                            reducedResult.add(jobResult.getData());
+                            Map<Character, AtomicLong> taskResult = jobResult.getData();
+                            for (Map.Entry<Character, AtomicLong> entryTaskResult : taskResult.entrySet()) {
+                                Character key = entryTaskResult.getKey();
+                                result.putIfAbsent(key, 0L);
+                                Long oldValue = result.get(key);
+                                Long value = entryTaskResult.getValue().get();
+                                result.put(key, oldValue + value);
+                            }
                         }
-                        return reducedResult;
+                        return result;
                     }
                 };
 
         IgniteCompute compute = ignite.compute().withNoFailover();
-        List<Long> results = compute.execute(task, null);
+        Map<Character, Long> results = compute.execute(task, null);
 
         LOGGER.info(String.format("'Letter Count' processing time: %d ms", System.currentTimeMillis() - start));
-        System.out.println("Total of found letters: " + results.get(0));
+        System.out.println("Total of found letters: " + results.toString());
     }
 }

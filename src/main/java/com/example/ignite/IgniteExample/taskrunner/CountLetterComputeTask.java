@@ -6,20 +6,20 @@ import org.apache.ignite.cache.query.ScanQuery;
 import org.apache.ignite.compute.ComputeJobAdapter;
 
 import javax.cache.Cache;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class CountLetterComputeTask extends ComputeJobAdapter {
 
     private final IgniteCache<String, String> cache;
-    private Long count = 0L;
-    private char lowerCaseLetter;
-    private char upperCaseLetter;
+    private Map<Character, AtomicLong> mapCount;
 
-    public CountLetterComputeTask(IgniteCache<String, String> cache, char letter) {
+    public CountLetterComputeTask(IgniteCache<String, String> cache) {
         this.cache = cache;
-        lowerCaseLetter = Character.toLowerCase(letter);
-        upperCaseLetter = Character.toUpperCase(letter);
+        this.mapCount = new HashMap<>();
     }
 
     @Override
@@ -33,16 +33,16 @@ public class CountLetterComputeTask extends ComputeJobAdapter {
 
             stream.forEach(this::countLetters);
 
-            return count;
+            return mapCount;
         }
     }
 
     private void countLetters(Cache.Entry<String, String> entry) {
         String value = entry.getValue();
         for (char letter : value.toCharArray()) {
-            if (letter == lowerCaseLetter || letter == upperCaseLetter) {
-                count ++;
-            }
+            Character letterUpperCase = Character.toUpperCase(letter);
+            mapCount.putIfAbsent(letterUpperCase, new AtomicLong());
+            mapCount.get(letterUpperCase).incrementAndGet();
         }
     }
 
