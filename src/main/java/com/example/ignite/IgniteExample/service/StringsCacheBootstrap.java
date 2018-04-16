@@ -1,10 +1,10 @@
-package com.example.ignite.IgniteExample.config;
+package com.example.ignite.IgniteExample.service;
 
 import org.apache.ignite.IgniteCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-@Configuration
+@Service
 public class StringsCacheBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StringsCacheBootstrap.class);
@@ -24,7 +24,6 @@ public class StringsCacheBootstrap {
     @Autowired
     public StringsCacheBootstrap(IgniteCache<String, String> cache) {
         this.cache = cache;
-        boostrap();
     }
 
     private List<String> getStrings() {

@@ -11,17 +11,13 @@ import org.apache.ignite.compute.ComputeTask;
 import org.apache.ignite.compute.ComputeTaskAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Component
 public class CountLettersTask {
@@ -36,8 +32,7 @@ public class CountLettersTask {
         this.cache = cache;
     }
 
-    @Scheduled(initialDelay = 200, fixedRate = 200000)
-    public void processMerchantStatus() {
+    public Map<Character, Long> countLetters() {
         LOGGER.info("Starting 'Letter Count' recalculation for all nodes.");
         long start = System.currentTimeMillis();
         ComputeTask<String, Map<Character, Long>>
@@ -74,9 +69,9 @@ public class CountLettersTask {
                 };
 
         IgniteCompute compute = ignite.compute().withNoFailover();
-        Map<Character, Long> results = compute.execute(task, null);
+        Map<Character, Long> result = compute.execute(task, null);
 
         LOGGER.info(String.format("'Letter Count' processing time: %d ms", System.currentTimeMillis() - start));
-        System.out.println("Total of found letters: " + results.toString());
+        return result;
     }
 }
