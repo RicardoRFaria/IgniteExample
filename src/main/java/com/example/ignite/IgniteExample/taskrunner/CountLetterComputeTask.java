@@ -23,7 +23,7 @@ public class CountLetterComputeTask extends ComputeJobAdapter {
     }
 
     @Override
-    public Object execute() {
+    public Map<Character, AtomicLong> execute() {
         ScanQuery<String, String> qry = new ScanQuery<>((key, value) -> true);
         qry.setLocal(true);
 
