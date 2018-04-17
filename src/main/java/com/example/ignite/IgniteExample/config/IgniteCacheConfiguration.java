@@ -21,7 +21,6 @@ public class IgniteCacheConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(IgniteCacheConfiguration.class);
 
     private static final String CACHE_MODEL_NAME = "strings-cache-v1";
-    private static final int CACHE_REPLICATION_FACTOR = 1;
 
     public static final int NETWORK_TIMEOUT = 30000;
     public static final int RETRY_COUNT = 10;
@@ -31,9 +30,7 @@ public class IgniteCacheConfiguration {
     org.apache.ignite.configuration.IgniteConfiguration igniteConfiguration() {
         CacheConfiguration cacheConfiguration = new CacheConfiguration(CACHE_MODEL_NAME);
         cacheConfiguration.setExpiryPolicyFactory(EternalExpiryPolicy.factoryOf());
-        cacheConfiguration.setBackups(CACHE_REPLICATION_FACTOR);
-        cacheConfiguration.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
-        cacheConfiguration.setCacheMode(CacheMode.REPLICATED);
+        cacheConfiguration.setCacheMode(CacheMode.PARTITIONED);
 
         org.apache.ignite.configuration.IgniteConfiguration
                 igniteConfiguration = new org.apache.ignite.configuration.IgniteConfiguration();
@@ -44,6 +41,8 @@ public class IgniteCacheConfiguration {
 
         igniteConfiguration.setCacheConfiguration(cacheConfiguration);
         igniteConfiguration.setDataStorageConfiguration(dataStorage);
+
+        igniteConfiguration.setPeerClassLoadingEnabled(true);
 
         return igniteConfiguration;
     }
