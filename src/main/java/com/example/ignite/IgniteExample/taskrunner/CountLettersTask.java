@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * Component that triggers the letter count using ignite nodes
+ */
 @Component
 public class CountLettersTask {
 
@@ -17,11 +20,21 @@ public class CountLettersTask {
     private final Ignite ignite;
     private final IgniteCache<String, String> cache;
 
+    /**
+     * Default constructor
+     * @param ignite Ignite node instance
+     * @param cache Ignite cache containing words to be counted
+     */
     public CountLettersTask(Ignite ignite, IgniteCache<String, String> cache) {
         this.ignite = ignite;
         this.cache = cache;
     }
 
+    /**
+     * Perform letter count on data at cache
+     *
+     * @return Map where Key is the letter found and Value is the number of occurrences
+     */
     public Map<Character, Long> countLetters() {
         LOGGER.info("Starting 'Letter Count' recalculation for all nodes.");
         long start = System.currentTimeMillis();

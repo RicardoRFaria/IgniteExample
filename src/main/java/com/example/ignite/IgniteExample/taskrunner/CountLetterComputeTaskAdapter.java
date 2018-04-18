@@ -6,7 +6,6 @@ import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.compute.ComputeJob;
 import org.apache.ignite.compute.ComputeJobResult;
 import org.apache.ignite.compute.ComputeTaskAdapter;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +13,20 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class CountLetterComputeTaskAdapter extends ComputeTaskAdapter<String, Map<Character, Long>> {
+/**
+ * Task adapter that distribute {@link CountLetterComputeTask} to Ignite nodes and do the reduce
+ */
+public final class CountLetterComputeTaskAdapter extends ComputeTaskAdapter<String, Map<Character, Long>> {
+
+    private static final long ZERO = 0L;
 
     private final IgniteCache<String, String> cache;
 
+    /**
+     * Default constructor
+     *
+     * @param cache Cache that contains the lines to count letters
+     */
     public CountLetterComputeTaskAdapter(IgniteCache<String, String> cache) {
         this.cache = cache;
     }
@@ -32,6 +41,13 @@ public class CountLetterComputeTaskAdapter extends ComputeTaskAdapter<String, Ma
         return map;
     }
 
+    /**
+     * Merge maps received from nodes into a new map
+     *
+     * @param jobResults received from all nodes
+     * @return new merged Map
+     * @throws IgniteException
+     */
     @Override
     public Map<Character, Long> reduce(List<ComputeJobResult> jobResults) throws IgniteException {
         Map<Character, Long> result = new HashMap<>();
@@ -39,7 +55,7 @@ public class CountLetterComputeTaskAdapter extends ComputeTaskAdapter<String, Ma
             Map<Character, AtomicLong> taskResult = jobResult.getData();
             for (Map.Entry<Character, AtomicLong> entryTaskResult : taskResult.entrySet()) {
                 Character key = entryTaskResult.getKey();
-                result.putIfAbsent(key, 0L);
+                result.putIfAbsent(key, ZERO);
                 Long oldValue = result.get(key);
                 Long value = entryTaskResult.getValue().get();
                 result.put(key, oldValue + value);

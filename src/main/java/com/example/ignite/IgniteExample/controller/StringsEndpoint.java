@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Controller that exposes the endpoints to perform tasks
+ */
 @Controller
 public class StringsEndpoint {
 
@@ -20,22 +23,40 @@ public class StringsEndpoint {
     private final CountLettersTask task;
     private final IgniteCache<String, String> cache;
 
+    /**
+     * default constructor
+     *
+     * @param cacheBootstrap
+     * @param task
+     * @param cache
+     */
     @Autowired
-    public StringsEndpoint(StringsCacheBootstrap cacheBootstrap, CountLettersTask task, IgniteCache<String, String> cache) {
+    public StringsEndpoint(StringsCacheBootstrap cacheBootstrap, CountLettersTask task,
+                           IgniteCache<String, String> cache) {
         this.cacheBootstrap = cacheBootstrap;
         this.task = task;
         this.cache = cache;
     }
 
+    /**
+     * Load files to cache
+     *
+     * @return
+     */
     @GetMapping("/bootstrap")
     @ResponseBody
     public String bootstrap() {
         Long startTime = System.currentTimeMillis();
-        cacheBootstrap.boostrap();
+        cacheBootstrap.bootstrap();
         Long totalTime = System.currentTimeMillis() - startTime;
         return "Bootstrap finished after " + totalTime + " ms.";
     }
 
+    /**
+     * Perform count letters across ignite nodes
+     *
+     * @return the object with count and total time elapsed
+     */
     @GetMapping("/count")
     @ResponseBody
     public CountResult countWords() {
@@ -45,6 +66,11 @@ public class StringsEndpoint {
         return new CountResult(totalTime, result);
     }
 
+    /**
+     * Perform count letters without send to ignite
+     *
+     * @return the object with count and total time elapsed
+     */
     @GetMapping("/countWithoutIgnite")
     @ResponseBody
     public CountResult countWithoutIgnite() {

@@ -12,11 +12,21 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * Task that count letters contained in cache and put on Map
+ * <br>
+ * <i><b>Important:</b> This task will be serialized and send across Ignite Nodes, don't put Spring components here or classes that can't be serialized.</i>
+ */
 public class CountLetterComputeTask extends ComputeJobAdapter {
 
     private final IgniteCache<String, String> cache;
     private Map<Character, AtomicLong> mapCount;
 
+    /**
+     * Default constructor
+     *
+     * @param cache Cache that contains the lines to count letters
+     */
     public CountLetterComputeTask(IgniteCache<String, String> cache) {
         this.cache = cache;
         this.mapCount = new HashMap<>();

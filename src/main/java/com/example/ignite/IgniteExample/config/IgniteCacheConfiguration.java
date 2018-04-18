@@ -3,28 +3,26 @@ package com.example.ignite.IgniteExample.config;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
-import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PreDestroy;
 import javax.cache.expiry.EternalExpiryPolicy;
 
+/**
+ * Class that configs the ignite cache
+ */
 @Configuration
 public class IgniteCacheConfiguration {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IgniteCacheConfiguration.class);
-
+    // Ignite cahe name with version
     private static final String CACHE_MODEL_NAME = "strings-cache-v1";
 
-    public static final int NETWORK_TIMEOUT = 30000;
-    public static final int RETRY_COUNT = 10;
-
+    private static final int NETWORK_TIMEOUT = 30000;
+    private static final int RETRY_COUNT = 10;
 
     @Bean
     org.apache.ignite.configuration.IgniteConfiguration igniteConfiguration() {

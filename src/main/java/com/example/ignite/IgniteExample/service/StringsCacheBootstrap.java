@@ -14,6 +14,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that fill ignite cache with the data to be processed
+ */
 @Service
 public class StringsCacheBootstrap {
 
@@ -21,6 +24,11 @@ public class StringsCacheBootstrap {
 
     private final IgniteCache<String, String> cache;
 
+    /**
+     * Default constructor
+     *
+     * @param cache
+     */
     @Autowired
     public StringsCacheBootstrap(IgniteCache<String, String> cache) {
         this.cache = cache;
@@ -37,7 +45,7 @@ public class StringsCacheBootstrap {
             }
             return lines;
         } catch (IOException e) {
-            LOGGER.error("Falha critica ao ler arquivo", e);
+            LOGGER.error("Failed to read file", e);
             throw new RuntimeException(e);
         }
     }
@@ -53,16 +61,19 @@ public class StringsCacheBootstrap {
         return textFiles;
     }
 
-    private File[] getResourceFolderFiles (String folder) {
+    private File[] getResourceFolderFiles(String folder) {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         URL url = loader.getResource(folder);
         String path = url.getPath();
         return new File(path).listFiles();
     }
 
-    public void boostrap() {
-        for (String linha : getStrings()) {
-            cache.put(linha, linha);
+    /**
+     * Perform cache bootstrap reading files under /texts path
+     */
+    public void bootstrap() {
+        for (String line : getStrings()) {
+            cache.put(line, line);
         }
     }
 
