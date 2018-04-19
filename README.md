@@ -1,8 +1,8 @@
 # Ignite Example
 
-Project presented on The Developers Conference 2018 (TDC) to demonstrate Apache Ignite.
+Example presented on The Developers Conference 2018 (TDC) to demonstrate Apache Ignite.
 
-The project loads data inside ```/texts``` folder from ```.txt``` files and put on Ignite Cache to count letter ocurrences.
+The project loads data in ```/texts``` folder from ```.txt``` files and put on Ignite Cache to count letter ocurrences.
 
 ## Endpoints
 
